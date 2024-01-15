@@ -16,7 +16,6 @@ fn main() {
 
 fn process_input(intput: &str) -> u32 {
     intput.lines().map(process_line).sum()
-  
 }
 
 fn process_line(line: &str) -> u32 {
@@ -53,5 +52,23 @@ fn process_line(line: &str) -> u32 {
     match ultimo {
         Some(unidad) => primero * 10 + unidad,
         None => primero * 10 + primero,
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_input() {
+       let test_input = "two1nine
+eightwothree
+abcone2threexyz
+xtwone3four
+4nineeightseven2
+zoneight234
+7pqrstsixteen";
+        assert_eq!(process_input(test_input), 281);
+       
     }
 }

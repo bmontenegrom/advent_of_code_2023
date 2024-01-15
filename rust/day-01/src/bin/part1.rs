@@ -29,5 +29,21 @@ fn process_input(intput: &str) -> u32 {
             }
         })
         .sum();
+    
     output
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_input() {
+       let test_str = "1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet";
+        assert_eq!(process_input(test_str), 142);
+       
+    }
 }

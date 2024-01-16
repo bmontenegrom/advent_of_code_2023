@@ -75,7 +75,7 @@ fn process_input(input: &str) -> Result<u32, String> {
 
 fn main() {
     let path = Path::new("src/bin/input_1.txt");
-    let mut file = match File::open(&path) {
+    let mut file = match File::open(path) {
         Ok(file) => file,
         Err(_) => panic!("no se encuentra el archivo"),
     };

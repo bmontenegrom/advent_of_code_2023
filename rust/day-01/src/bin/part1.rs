@@ -3,7 +3,7 @@ use std::{fs::File, io::Read, path::Path};
 
 fn main() {
     let path = Path::new("input_1.txt");
-    let mut file = match File::open(&path) {
+    let mut file = match File::open(path) {
         Ok(file) => file,
         Err(_) => panic!("couldn't open file"),
     };

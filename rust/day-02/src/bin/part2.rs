@@ -19,7 +19,7 @@ struct Set<'a> {
 }
 #[derive(Debug)]
 struct Game<'a> {
-    id: u32,
+    _id: u32,
     sets: Vec<Set<'a>>,
 }
 
@@ -60,7 +60,7 @@ fn game(input: &str) -> IResult<&str, Game> {
     Ok((
         input,
         Game {
-            id: id.parse().unwrap(),
+            _id: id.parse().unwrap(),
             sets,
         },
     ))
@@ -82,7 +82,7 @@ fn process_input(input: &str) -> Result<u32, String> {
 
 fn main() {
     let path = Path::new("src/bin/input_2.txt");
-    let mut file = match File::open(&path) {
+    let mut file = match File::open(path) {
         Ok(file) => file,
         Err(_) => panic!("no se encuentra el archivo"),
     };

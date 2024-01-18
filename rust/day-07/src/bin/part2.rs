@@ -45,7 +45,7 @@ impl Ord for Hand {
                     return card.value.cmp(&other_card.value);
                 }
             }
-            return Ordering::Equal;
+            Ordering::Equal
         } else {
             self.value.cmp(&other.value)
         }
@@ -66,7 +66,7 @@ impl PartialEq for Hand {
                     return false;
                 }
             }
-            return true;
+            true
         } else {
             false
         }
@@ -125,7 +125,7 @@ fn parse_input(input: &str) -> Vec<Hand> {
     input
         .lines()
         .map(|line| {
-            let line_split: Vec<_> = line.split(" ").collect();
+            let line_split: Vec<_> = line.split(' ').collect();
             let cards_str = line_split[0];
             let bid_str = line_split[1];
 

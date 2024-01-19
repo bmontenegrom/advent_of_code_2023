@@ -1,14 +1,14 @@
-use std::{collections::HashMap, str::FromStr};
-use num_integer::Integer;
 use nom::{
     branch::alt,
     bytes::complete::tag,
-    character::complete::{self, line_ending, multispace1, alphanumeric1},
+    character::complete::{self, alphanumeric1, line_ending, multispace1},
     combinator::eof,
     multi::{fold_many1, many1},
     sequence::{delimited, separated_pair, terminated},
     IResult, Parser,
 };
+use num_integer::Integer;
+use std::{collections::HashMap, str::FromStr};
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum Direction {
@@ -86,7 +86,11 @@ impl PuzzleMap {
     }
 
     fn ghost_navigate(&self) -> Result<u64, String> {
-        self.nodes.keys().filter(|node| node.is_start_node()).map(|node| self.navigate(node)).try_fold(1, |acc, cant| Ok(acc.lcm(&cant?)))
+        self.nodes
+            .keys()
+            .filter(|node| node.is_start_node())
+            .map(|node| self.navigate(node))
+            .try_fold(1, |acc, cant| Ok(acc.lcm(&cant?)))
     }
 }
 
@@ -159,6 +163,4 @@ XXX = (XXX, XXX)";
         let (_, map) = parse_input(input).expect("no se pudo parsear el input");
         assert_eq!(map.ghost_navigate().unwrap(), 6);
     }
-
-    
 }

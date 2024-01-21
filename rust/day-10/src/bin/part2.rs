@@ -1,4 +1,7 @@
-use std::{collections::{HashMap, HashSet}, hash::Hash};
+use std::{
+    collections::{HashMap, HashSet},
+    hash::Hash,
+};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone, Copy)]
 struct Point {
@@ -24,9 +27,11 @@ struct Node {
     node_type: TypeNode,
 }
 
-
-
-fn start_equivalence(map:&HashMap<Point,Node>, visitados: &HashSet<Point>, start: Point )->TypeNode{
+fn start_equivalence(
+    map: &HashMap<Point, Node>,
+    visitados: &HashSet<Point>,
+    start: Point,
+) -> TypeNode {
     let north = Point {
         x: start.x,
         y: start.y - 1,
@@ -43,30 +48,42 @@ fn start_equivalence(map:&HashMap<Point,Node>, visitados: &HashSet<Point>, start
         x: start.x - 1,
         y: start.y,
     };
-    let conected_north = visitados.contains(&north) && match map.get(&north) {
-        Some(node) => node.node_type == TypeNode::NorthSouth
-            || node.node_type == TypeNode::SouthEast
-            || node.node_type == TypeNode::SouthWest,
-        None => false,
-    };
-    let conected_south = visitados.contains(&south) && match map.get(&south) {
-        Some(node) => node.node_type == TypeNode::NorthSouth
-            || node.node_type == TypeNode::NorthEast
-            || node.node_type == TypeNode::NorthWest,
-        None => false,
-    };
-    let conected_east = visitados.contains(&east) && match map.get(&east) {
-        Some(node) => node.node_type == TypeNode::EastWest
-            || node.node_type == TypeNode::NorthWest
-            || node.node_type == TypeNode::SouthWest,
-        None => false,
-    };
-    let conected_west = visitados.contains(&west) && match map.get(&west) {
-        Some(node) => node.node_type == TypeNode::EastWest
-            || node.node_type == TypeNode::NorthEast
-            || node.node_type == TypeNode::SouthEast,
-        None => false,
-    };
+    let conected_north = visitados.contains(&north)
+        && match map.get(&north) {
+            Some(node) => {
+                node.node_type == TypeNode::NorthSouth
+                    || node.node_type == TypeNode::SouthEast
+                    || node.node_type == TypeNode::SouthWest
+            }
+            None => false,
+        };
+    let conected_south = visitados.contains(&south)
+        && match map.get(&south) {
+            Some(node) => {
+                node.node_type == TypeNode::NorthSouth
+                    || node.node_type == TypeNode::NorthEast
+                    || node.node_type == TypeNode::NorthWest
+            }
+            None => false,
+        };
+    let conected_east = visitados.contains(&east)
+        && match map.get(&east) {
+            Some(node) => {
+                node.node_type == TypeNode::EastWest
+                    || node.node_type == TypeNode::NorthWest
+                    || node.node_type == TypeNode::SouthWest
+            }
+            None => false,
+        };
+    let conected_west = visitados.contains(&west)
+        && match map.get(&west) {
+            Some(node) => {
+                node.node_type == TypeNode::EastWest
+                    || node.node_type == TypeNode::NorthEast
+                    || node.node_type == TypeNode::SouthEast
+            }
+            None => false,
+        };
     let case = (conected_north, conected_south, conected_east, conected_west);
     match case {
         (true, true, false, false) => TypeNode::NorthSouth,
@@ -76,7 +93,6 @@ fn start_equivalence(map:&HashMap<Point,Node>, visitados: &HashSet<Point>, start
         (false, true, false, true) => TypeNode::SouthWest,
         (false, false, true, true) => TypeNode::EastWest,
         _ => panic!("No se puede llegar al punto de inicio"),
-        
     }
 }
 
@@ -114,7 +130,6 @@ fn process_input(input: &str) -> Result<u64, String> {
             break;
         }
     }
-    
 
     let mut visitados: HashSet<Point> = HashSet::new();
     while !visitados.contains(&current_point) {
@@ -244,39 +259,45 @@ fn process_input(input: &str) -> Result<u64, String> {
             TypeNode::Start => {
                 if !visitados.contains(&north)
                     && match map.get(&north) {
-                        Some(node) => node.node_type == TypeNode::NorthSouth
-                            || node.node_type == TypeNode::SouthEast
-                            || node.node_type == TypeNode::SouthWest,
+                        Some(node) => {
+                            node.node_type == TypeNode::NorthSouth
+                                || node.node_type == TypeNode::SouthEast
+                                || node.node_type == TypeNode::SouthWest
+                        }
                         None => false,
                     }
                 {
                     north
                 } else if !visitados.contains(&south)
                     && match map.get(&south) {
-                        Some(node) => node.node_type == TypeNode::NorthSouth
-                            || node.node_type == TypeNode::NorthEast
-                            || node.node_type == TypeNode::NorthWest,
+                        Some(node) => {
+                            node.node_type == TypeNode::NorthSouth
+                                || node.node_type == TypeNode::NorthEast
+                                || node.node_type == TypeNode::NorthWest
+                        }
                         None => false,
                     }
                 {
                     south
                 } else if !visitados.contains(&east)
                     && match map.get(&east) {
-                        Some(node) => node.node_type == TypeNode::EastWest
-                            || node.node_type == TypeNode::NorthWest
-                            || node.node_type == TypeNode::SouthWest,
+                        Some(node) => {
+                            node.node_type == TypeNode::EastWest
+                                || node.node_type == TypeNode::NorthWest
+                                || node.node_type == TypeNode::SouthWest
+                        }
                         None => false,
-                        
                     }
                 {
                     east
                 } else if !visitados.contains(&west)
                     && match map.get(&west) {
-                        Some(node) => node.node_type == TypeNode::EastWest
-                            || node.node_type == TypeNode::NorthEast
-                            || node.node_type == TypeNode::SouthEast,
+                        Some(node) => {
+                            node.node_type == TypeNode::EastWest
+                                || node.node_type == TypeNode::NorthEast
+                                || node.node_type == TypeNode::SouthEast
+                        }
                         None => false,
-                        
                     }
                 {
                     west
@@ -289,8 +310,6 @@ fn process_input(input: &str) -> Result<u64, String> {
         visitados.insert(current_point);
         current_point = next_point;
     }
-    
-    
 
     let mut interno = HashSet::new();
     let max_x = map.keys().max_by_key(|p| p.x).unwrap().x;
@@ -318,33 +337,29 @@ fn process_input(input: &str) -> Result<u64, String> {
                         right += 1;
                     }
 
-                    TypeNode::Start => {
-                        
-                        match start_equivalence(&map, &visitados, Point { x, y }) {
-                            TypeNode::EastWest => {
-                                letf += 1;
-                                right += 1;
-                            }
-                            TypeNode::NorthEast => {
-                                right += 1;
-                            }
-                            TypeNode::NorthWest => {
-                                letf += 1;
-                            }
-                            TypeNode::SouthWest => {
-                                letf += 1;
-                            }
-                            TypeNode::SouthEast => {
-                                right += 1;
-                            }
-                            _ => {}
+                    TypeNode::Start => match start_equivalence(&map, &visitados, Point { x, y }) {
+                        TypeNode::EastWest => {
+                            letf += 1;
+                            right += 1;
                         }
-                    }
+                        TypeNode::NorthEast => {
+                            right += 1;
+                        }
+                        TypeNode::NorthWest => {
+                            letf += 1;
+                        }
+                        TypeNode::SouthWest => {
+                            letf += 1;
+                        }
+                        TypeNode::SouthEast => {
+                            right += 1;
+                        }
+                        _ => {}
+                    },
                     _ => {}
                 },
 
                 false => {
-                                        
                     if letf.min(right) % 2 == 1 {
                         interno.insert(Point { x, y });
                     }

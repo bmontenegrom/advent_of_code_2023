@@ -91,11 +91,11 @@ impl Plataform {
             for x in (0..self.grid[0].len() - 1).rev() {
                 if self.grid[y][x] == 'O' && self.grid[y][x + 1] == '.' {
                     let mut change = x + 1;
-                            while change < self.grid[0].len() && self.grid[y][change] == '.' {
-                                change += 1;
-                            }
-                            self.grid[y][change - 1] = 'O';
-                            self.grid[y][x] = '.';
+                    while change < self.grid[0].len() && self.grid[y][change] == '.' {
+                        change += 1;
+                    }
+                    self.grid[y][change - 1] = 'O';
+                    self.grid[y][x] = '.';
                 }
             }
         }

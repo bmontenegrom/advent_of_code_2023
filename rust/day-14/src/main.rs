@@ -45,19 +45,13 @@ impl Plataform {
     fn move_north(&mut self) {
         for x in 0..self.grid[0].len() {
             for y in 1..self.grid.len() {
-                match self.grid[y][x] {
-                    'O' => match self.grid[y - 1][x] {
-                        '.' => {
-                            let mut change = (y - 1) as isize;
-                            while change >= 0 && self.grid[change as usize][x] == '.' {
-                                change -= 1;
-                            }
-                            self.grid[(change + 1) as usize][x] = 'O';
-                            self.grid[y][x] = '.';
-                        }
-                        _ => {}
-                    },
-                    _ => {}
+                if self.grid[y][x] == 'O' && self.grid[y - 1][x] == '.' {
+                    let mut change = (y - 1) as isize;
+                    while change >= 0 && self.grid[change as usize][x] == '.' {
+                        change -= 1;
+                    }
+                    self.grid[(change + 1) as usize][x] = 'O';
+                    self.grid[y][x] = '.';
                 }
             }
         }
@@ -66,19 +60,13 @@ impl Plataform {
     fn move_south(&mut self) {
         for x in 0..self.grid[0].len() {
             for y in (0..self.grid.len() - 1).rev() {
-                match self.grid[y][x] {
-                    'O' => match self.grid[y + 1][x] {
-                        '.' => {
-                            let mut change = y + 1;
-                            while change < self.grid.len() && self.grid[change][x] == '.' {
-                                change += 1;
-                            }
-                            self.grid[change - 1][x] = 'O';
-                            self.grid[y][x] = '.';
-                        }
-                        _ => {}
-                    },
-                    _ => {}
+                if self.grid[y][x] == 'O' && self.grid[y + 1][x] == '.' {
+                    let mut change = y + 1;
+                    while change < self.grid.len() && self.grid[change][x] == '.' {
+                        change += 1;
+                    }
+                    self.grid[change - 1][x] = 'O';
+                    self.grid[y][x] = '.';
                 }
             }
         }
@@ -86,19 +74,13 @@ impl Plataform {
     fn move_west(&mut self) {
         for y in 0..self.grid.len() {
             for x in 1..self.grid[0].len() {
-                match self.grid[y][x] {
-                    'O' => match self.grid[y][x - 1] {
-                        '.' => {
-                            let mut change = (x - 1) as isize;
-                            while change >= 0 && self.grid[y][change as usize] == '.' {
-                                change -= 1;
-                            }
-                            self.grid[y][(change + 1) as usize] = 'O';
-                            self.grid[y][x] = '.';
-                        }
-                        _ => {}
-                    },
-                    _ => {}
+                if self.grid[y][x] == 'O' && self.grid[y][x - 1] == '.' {
+                    let mut change = (x - 1) as isize;
+                    while change >= 0 && self.grid[y][change as usize] == '.' {
+                        change -= 1;
+                    }
+                    self.grid[y][(change + 1) as usize] = 'O';
+                    self.grid[y][x] = '.';
                 }
             }
         }
@@ -107,19 +89,13 @@ impl Plataform {
     fn move_east(&mut self) {
         for y in 0..self.grid.len() {
             for x in (0..self.grid[0].len() - 1).rev() {
-                match self.grid[y][x] {
-                    'O' => match self.grid[y][x + 1] {
-                        '.' => {
-                            let mut change = x + 1;
+                if self.grid[y][x] == 'O' && self.grid[y][x + 1] == '.' {
+                    let mut change = x + 1;
                             while change < self.grid[0].len() && self.grid[y][change] == '.' {
                                 change += 1;
                             }
                             self.grid[y][change - 1] = 'O';
                             self.grid[y][x] = '.';
-                        }
-                        _ => {}
-                    },
-                    _ => {}
                 }
             }
         }
@@ -152,6 +128,7 @@ fn solve_part2(input: &str) -> usize {
                 //tambien se pueede obtener el ya calculado con el id i + remaining-cycle_len+1
                 plataform.cycle();
             }
+
             return plataform.calculate_score();
         }
     }

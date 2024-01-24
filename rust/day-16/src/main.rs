@@ -1,4 +1,5 @@
 use std::collections::{HashSet, VecDeque};
+use rayon::prelude::*;
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 enum Directions {
@@ -320,12 +321,57 @@ fn process_part2(input: &str) -> usize {
     max
 }
 
+
+fn process_part2_par(input: &str) -> usize {
+    let grid = Grid::new(input);
+    let max_row_east = (0..grid.grid.len())
+        .into_par_iter()
+        .map(|y| {
+            let start_beam = Beam::new(Point::new(0, y as i64), Directions::East);
+            grid.energized_tiles(start_beam)
+        })
+        .reduce(|| 0, |max, current| max.max(current));
+
+    let max_column_south = (0..grid.grid[0].len())
+        .into_par_iter()
+        .map(|x| {
+            let start_beam = Beam::new(Point::new(x as i64, 0), Directions::South);
+            grid.energized_tiles(start_beam)
+        })
+        .reduce(|| 0, |max, current| max.max(current));
+
+    let last_row = grid.grid.len() - 1;
+    let max_row_north = (0..grid.grid[last_row].len())
+        .into_par_iter()
+        .map(|x| {
+            let start_beam = Beam::new(Point::new(x as i64, last_row as i64), Directions::North);
+            grid.energized_tiles(start_beam)
+        })
+        .reduce(|| 0, |max, current| max.max(current));
+
+    let last_column = grid.grid[0].len() - 1;
+    let max = (0..grid.grid.len())
+        .into_par_iter()
+        .map(|y| {
+            let start_beam = Beam::new(Point::new(last_column as i64, y as i64), Directions::West);
+            grid.energized_tiles(start_beam)
+        })
+        .reduce(|| 0, |max, current| max.max(current));
+
+    max.max(max_row_east)
+        .max(max_column_south)
+        .max(max_row_north)
+}
+
+
 fn main() {
     let input = include_str!("input.txt");
     let now = std::time::Instant::now();
     println!("Part 1: {} in : {:?}", process_part1(input), now.elapsed());
     let now = std::time::Instant::now();
     println!("Part 2: {} in : {:?}", process_part2(input), now.elapsed());
+    let now = std::time::Instant::now();
+    println!("Part 2 par: {} in : {:?}", process_part2_par(input), now.elapsed());
 }
 
 #[cfg(test)]
@@ -342,6 +388,12 @@ mod test {
     fn test_part2() {
         let input = include_str!("input_test.txt");
         let result = process_part2(input);
+        assert_eq!(result, 51);
+    }
+    #[test]
+    fn test_part2_par() {
+        let input = include_str!("input_test.txt");
+        let result = process_part2_par(input);
         assert_eq!(result, 51);
     }
 }

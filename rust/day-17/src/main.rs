@@ -243,6 +243,7 @@ fn using_pathfinding_part2(input: &str) -> usize {
     esast_path.unwrap().1.min(south_path.unwrap().1)
 }
 
+#[allow(dead_code)]
 fn print_path(input: &str) {
     let grid = Grid::new(input);
     let start_south = Node::new(Point::new(0, 0), Direction::South, 0);

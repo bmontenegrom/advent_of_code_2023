@@ -1,0 +1,25 @@
+parents  = [], previus_condition = [], path = []
+IN : in{s<1351:px,qqz}
+    -s<1351:px
+    new_parents = [s<1351]
+    previus_condition = [s>=1351]
+    path += generate_path(wrkf, px, new_parents ):
+        PX : px{a<2006:qkq,m>2090:A,rfg}
+        -a<2006:qkq
+        parents  = new_parents = [s<1351]
+        new_parents = [s<1351, a<2006]
+        previus_condition = [a>=2006]
+        path += generate_path(wkf, qkq, new_parents )
+            QKQ: qkq{x<1416:A,crn,}
+            -x<1416:A
+            parents = [s<1351, a<2006]
+            new_parents = [s<1351, a<2006, x<1416]
+            previus_condition = [x>=1416]
+            path += [[s<1351, a<2006, x<1416]]
+            -crn
+            path += generate_path(wrkf, crn, new_parents)
+                CRN: crn{x>2662:A,R}
+                parents = [s<1351, a<2006, x<1416]
+                new_parents = [s<1351, a<2006, x<1416, x>2662]
+                path = [[s<1351, a<2006, x<1416], [s<1351, a<2006, x<1416, x>2662]]
+        //path = [[s<1351, a<2006, x<1416], [s<1351, a<2006, x<1416, x>2662]]

@@ -1,0 +1,6 @@
+broadcaster -> qk, zs, kf, kr
+&qk -> gf
+&zs -> gf
+&kf -> gf
+&kr -> gf
+&gf -> rx

@@ -10,7 +10,6 @@ use nom::{
     IResult,
 };
 
-
 #[derive(Debug)]
 struct Part {
     x: isize,
@@ -107,7 +106,6 @@ impl Condition {
             Condition::GreaterThanEqual(var, val) => Condition::LessThan(*var, *val),
         }
     }
-    
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
@@ -142,7 +140,7 @@ impl Rule {
                 tuple((Condition::parse, tag(":"), Destination::parse)),
                 |(c, _, d)| Rule::Evaluation(c, d),
             ),
-            map(Destination::parse,  Rule::Fallthrough),
+            map(Destination::parse, Rule::Fallthrough),
         ))(input)
     }
     fn evaluate(&self, part: &Part) -> Option<Destination> {
@@ -207,16 +205,15 @@ fn solve_part1(input: &str) -> isize {
         .sum()
 }
 
-
 fn generate_paths(
     workflows: &HashMap<String, Workflow>,
     current: &str,
-    paretns: &[Condition]
-)-> Vec<Vec<Condition>>{
+    paretns: &[Condition],
+) -> Vec<Vec<Condition>> {
     let mut paths = Vec::new();
     let workflow = workflows.get(current).unwrap();
     let mut previus_condition = Vec::new();
-    for rule in &workflow.rules{
+    for rule in &workflow.rules {
         let mut new_parents = paretns.to_vec();
         new_parents.extend(previus_condition.clone());
         match rule {
@@ -226,28 +223,25 @@ fn generate_paths(
                 match dest {
                     Destination::Accept => {
                         paths.push(new_parents);
-                    },
-                    Destination::Reject => {},
-                    Destination::Workflow(name) => {
-                        paths.extend(generate_paths(workflows, name, &new_parents));
                     }
-                }
-            },
-            Rule::Fallthrough(dest) =>{
-                match dest {
-                    Destination::Accept => {
-                        paths.push(new_parents);
-                    },
-                    Destination::Reject => {},
+                    Destination::Reject => {}
                     Destination::Workflow(name) => {
                         paths.extend(generate_paths(workflows, name, &new_parents));
                     }
                 }
             }
-            
+            Rule::Fallthrough(dest) => match dest {
+                Destination::Accept => {
+                    paths.push(new_parents);
+                }
+                Destination::Reject => {}
+                Destination::Workflow(name) => {
+                    paths.extend(generate_paths(workflows, name, &new_parents));
+                }
+            },
         }
     }
-    
+
     paths
 }
 
@@ -283,7 +277,6 @@ fn calculate_possible_combinations(path: &[Condition]) -> isize {
         }
     }
 
-    
     (max_part.x - min_part.x + 1)
         * (max_part.m - min_part.m + 1)
         * (max_part.a - min_part.a + 1)
@@ -293,7 +286,10 @@ fn calculate_possible_combinations(path: &[Condition]) -> isize {
 fn solve_part2(input: &str) -> isize {
     let (_, (_, workflows)) = parse_input(input).unwrap();
     let paths = generate_paths(&workflows, "in", &[]);
-    paths.iter().map(|p| calculate_possible_combinations(p)).sum()
+    paths
+        .iter()
+        .map(|p| calculate_possible_combinations(p))
+        .sum()
 }
 
 fn main() {
@@ -301,7 +297,6 @@ fn main() {
     let now = std::time::Instant::now();
     println!("Part 1: {} in {:?}", solve_part1(input), now.elapsed());
     println!("Part 2: {} in {:?}", solve_part2(input), now.elapsed());
-    
 }
 
 #[cfg(test)]

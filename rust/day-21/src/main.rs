@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque, hash_map::Entry::Vacant};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 struct Point {
@@ -85,8 +85,8 @@ impl Garden {
         let mut frontier = VecDeque::new();
         frontier.push_back((self.start, 0));
         while let Some((point, distance)) = frontier.pop_front() {
-            if !distances.contains_key(&point) {
-                distances.insert(point, distance);
+            if let Vacant(e) = distances.entry(point) {
+                e.insert(distance);
                 for neighbour in self.neigbours(&point) {
                     frontier.push_back((neighbour, distance + 1));
                 }
@@ -117,10 +117,10 @@ impl Garden {
             },
         );
         let count = 202300;
-        let total_odds = odds * (count + 1) * (count + 1);//odds*(n+1)^2
-        let total_evens = evens * (count * count);//evens*n^2
-        let total_odd_corners = odd_corners * (count + 1);//odd_corners*(n+1)
-        let total_even_corners = even_corners * count;//even_corners*n
+        let total_odds = odds * (count + 1) * (count + 1); //odds*(n+1)^2
+        let total_evens = evens * (count * count); //evens*n^2
+        let total_odd_corners = odd_corners * (count + 1); //odd_corners*(n+1)
+        let total_even_corners = even_corners * count; //even_corners*n
         total_odds + total_evens - total_odd_corners + total_even_corners
     }
 }

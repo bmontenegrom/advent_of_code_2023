@@ -1,7 +1,4 @@
-use std::{
-    collections::{HashMap, HashSet, VecDeque},
-    ops::Deref,
-};
+use std::collections::{HashMap, VecDeque};
 
 use nom::{
     branch::alt,
@@ -10,7 +7,6 @@ use nom::{
     multi::separated_list1,
     IResult,
 };
-
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 enum Signal {
@@ -37,62 +33,41 @@ struct Machine<'a> {
 }
 
 impl<'a> Machine<'a> {
-    fn process(
-        &mut self,
-        sending_machine_id: String,
-        signal: &Signal,
-    ) -> Vec<(From, To, Signal)> {
+    fn process(&mut self, sending_machine_id: String, signal: &Signal) -> Vec<(From, To, Signal)> {
         match &mut self.machine_type {
             MachineType::Broadcast => self
                 .output
                 .iter()
-                .map(|&id| {
-                    (
-                        self.id.to_string(),
-                        id.to_string(),
-                        *signal,
-                    )
-                })
+                .map(|&id| (self.id.to_string(), id.to_string(), *signal))
                 .collect::<Vec<(From, To, Signal)>>(),
-            MachineType::FlipFlop { ref mut status } => {
-                match (signal, &status) {
-                    (Signal::High, _) => vec![],
-                    (Signal::Low, Status::On) => {
-                        *status = Status::Off;
-                        self.output
-                            .iter()
-                            .map(|&id| (self.id.to_string(), id.to_string(), Signal::Low))
-                            .collect::<Vec<(From, To, Signal)>>()
-                    }
-                    (Signal::Low, Status::Off) => {
-                        *status = Status::On;
-                        self.output
-                            .iter()
-                            .map(|&id| (self.id.to_string(), id.to_string(), Signal::High))
-                            .collect::<Vec<(From, To, Signal)>>()
-                    }
+            MachineType::FlipFlop { ref mut status } => match (signal, &status) {
+                (Signal::High, _) => vec![],
+                (Signal::Low, Status::On) => {
+                    *status = Status::Off;
+                    self.output
+                        .iter()
+                        .map(|&id| (self.id.to_string(), id.to_string(), Signal::Low))
+                        .collect::<Vec<(From, To, Signal)>>()
                 }
-            }
+                (Signal::Low, Status::Off) => {
+                    *status = Status::On;
+                    self.output
+                        .iter()
+                        .map(|&id| (self.id.to_string(), id.to_string(), Signal::High))
+                        .collect::<Vec<(From, To, Signal)>>()
+                }
+            },
             MachineType::Conjunction { memory } => {
+                *memory.get_mut(sending_machine_id.as_str()).unwrap() = *signal;
 
-                *memory
-                    .get_mut(sending_machine_id.as_str())
-                    .unwrap() = *signal;
-
-                let new_signal = memory
-                    .values()
-                    .all(|s| s == &Signal::High)
-                    .then_some(Signal::Low)
-                    .unwrap_or(Signal::High);
+                let new_signal = if memory.values().all(|s| s == &Signal::High) {
+                    Signal::Low
+                } else {
+                    Signal::High
+                };
                 self.output
                     .iter()
-                    .map(|id| {
-                        (
-                            self.id.to_string(),
-                            id.to_string(),
-                            new_signal,
-                        )
-                    })
+                    .map(|id| (self.id.to_string(), id.to_string(), new_signal))
                     .collect::<Vec<(From, To, Signal)>>()
             }
         }
@@ -101,8 +76,7 @@ impl<'a> Machine<'a> {
 
 fn broadcast(input: &str) -> IResult<&str, Machine> {
     let (input, _) = tag("broadcaster -> ")(input)?;
-    let (input, outputs) =
-        separated_list1(tag(", "), alpha1)(input)?;
+    let (input, outputs) = separated_list1(tag(", "), alpha1)(input)?;
     Ok((
         input,
         Machine {
@@ -116,8 +90,7 @@ fn flip_flop(input: &str) -> IResult<&str, Machine> {
     let (input, _) = tag("%")(input)?;
     let (input, name) = alpha1(input)?;
     let (input, _) = tag(" -> ")(input)?;
-    let (input, outputs) =
-        separated_list1(tag(", "), alpha1)(input)?;
+    let (input, outputs) = separated_list1(tag(", "), alpha1)(input)?;
     Ok((
         input,
         Machine {
@@ -133,8 +106,7 @@ fn conjunction(input: &str) -> IResult<&str, Machine> {
     let (input, _) = tag("&")(input)?;
     let (input, name) = alpha1(input)?;
     let (input, _) = tag(" -> ")(input)?;
-    let (input, outputs) =
-        separated_list1(tag(", "), alpha1)(input)?;
+    let (input, outputs) = separated_list1(tag(", "), alpha1)(input)?;
     Ok((
         input,
         Machine {
@@ -146,13 +118,9 @@ fn conjunction(input: &str) -> IResult<&str, Machine> {
         },
     ))
 }
-fn parse(
-    input: &str,
-) -> IResult<&str, HashMap<&str, Machine>> {
-    let (input, machines) = separated_list1(
-        line_ending,
-        alt((broadcast, flip_flop, conjunction)),
-    )(input)?;
+fn parse(input: &str) -> IResult<&str, HashMap<&str, Machine>> {
+    let (input, machines) =
+        separated_list1(line_ending, alt((broadcast, flip_flop, conjunction)))(input)?;
     Ok((
         input,
         machines
@@ -167,42 +135,25 @@ fn parse(
 type From = String;
 type To = String;
 
-fn process(
-    input: &str,
-) -> Result<String, String> {
-    let (input, mut machines) =
-        parse(input).expect("should parse");
+fn process(input: &str) -> Result<String, String> {
+    let (_, mut machines) = parse(input).expect("should parse");
 
     let final_node = "rx";
     let penultimate_node = machines
         .iter()
-        .find_map(|(id, machine)| {
-            machine
-                .output
-                .contains(&final_node)
-                .then_some(*id)
-        })
+        .find_map(|(id, machine)| machine.output.contains(&final_node).then_some(*id))
         .unwrap();
     let mut penultimate_nodes = machines
         .iter()
-        .filter_map(|(id, machine)| {
-            machine
-                .output
-                .contains(&penultimate_node)
-                .then_some(*id)
-        })
+        .filter_map(|(id, machine)| machine.output.contains(&penultimate_node).then_some(*id))
         .collect::<Vec<&str>>();
 
     let conjunctions = machines
         .iter()
-        .filter_map(|(id, machine)| {
-            match &machine.machine_type {
-                MachineType::Broadcast => None,
-                MachineType::FlipFlop { .. } => None,
-                MachineType::Conjunction { .. } => {
-                    Some(*id)
-                }
-            }
+        .filter_map(|(id, machine)| match &machine.machine_type {
+            MachineType::Broadcast => None,
+            MachineType::FlipFlop { .. } => None,
+            MachineType::Conjunction { .. } => Some(*id),
         })
         .collect::<Vec<&str>>();
     let inputs = machines.iter().fold(
@@ -220,58 +171,43 @@ fn process(
             acc
         },
     );
-    inputs.into_iter().for_each(
-        |(conjunction, input_machines)| {
-            machines.entry(conjunction).and_modify(
-                |machine| {
-                    let MachineType::Conjunction {
-                        memory,
-                        ..
-                    } = &mut machine.machine_type
-                    else {
-                        unreachable!("has to exist");
-                    };
-                    *memory = input_machines
-                        .into_iter()
-                        .map(|id| (id, Signal::Low))
-                        .collect();
-                },
-            );
-        },
-    );
+    inputs
+        .into_iter()
+        .for_each(|(conjunction, input_machines)| {
+            machines.entry(conjunction).and_modify(|machine| {
+                let MachineType::Conjunction { memory, .. } = &mut machine.machine_type else {
+                    unreachable!("has to exist");
+                };
+                *memory = input_machines
+                    .into_iter()
+                    .map(|id| (id, Signal::Low))
+                    .collect();
+            });
+        });
 
     let mut lcms: Vec<usize> = vec![];
     for i in 0.. {
         if lcms.len() == 4 {
             break;
         }
-        let mut inbox =
-            VecDeque::<(From, To, Signal)>::from([(
-                String::from("button"),
-                String::from("broadcaster"),
-                Signal::Low,
-            )]);
-        while let Some((from, id, signal)) =
-            inbox.pop_front()
-        {
-            if penultimate_nodes.contains(&id.as_str())
-                && signal == Signal::Low
-            {
-                let index = penultimate_nodes
-                    .iter()
-                    .position(|x| x == &id)
-                    .unwrap();
+        let mut inbox = VecDeque::<(From, To, Signal)>::from([(
+            String::from("button"),
+            String::from("broadcaster"),
+            Signal::Low,
+        )]);
+        while let Some((from, id, signal)) = inbox.pop_front() {
+            if penultimate_nodes.contains(&id.as_str()) && signal == Signal::Low {
+                let index = penultimate_nodes.iter().position(|x| x == &id).unwrap();
                 penultimate_nodes.remove(index);
                 println!("{}: {}", id, i + 1);
                 lcms.push(i + 1);
             }
-            
+
             let output = machines
                 .get_mut(id.as_str())
                 .map(|m| m.process(from.clone(), &signal))
                 .unwrap_or(vec![]);
 
-            
             inbox.extend(output);
         }
     }
@@ -297,6 +233,6 @@ fn gcd_of_two_numbers(a: usize, b: usize) -> usize {
 
 fn main() {
     let input = include_str!("input.txt");
-    let result = process(&input).expect("should process");
+    let result = process(input).expect("should process");
     println!("{}", result);
 }
